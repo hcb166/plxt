@@ -13,6 +13,7 @@ import {
 import Dimensions from 'Dimensions';
 const { width, height } = Dimensions.get('window');
 
+
 class Urgent extends Component {
     render() {
         const isTrue = this.props.ergent;

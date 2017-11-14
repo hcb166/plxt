@@ -11,6 +11,7 @@ import {
     Image,
     Button,
     FlatList,
+    ToastAndroid,
     TouchableHighlight,
 } from 'react-native';
 
@@ -85,23 +86,31 @@ export default class Details extends Component {
     }
     
     componentDidMount() {
-        const { params } = this.props.navigation.state;
-        storage.getAllDataForKey('readedNews').then((readedNews) => {
-            let readedList = [];
-            if (readedNews.length > 0 && readedNews[0].length>0) {
-                readedList = readedNews[0];
+        // 从扫描页面返回时 避免undefined造成的闪退
+        try {
+            const { params } = this.props.navigation.state;
+            if ( params && typeof params.info === 'object') {
+                storage.getAllDataForKey('readedNews').then((readedNews) => {
+                    let readedList = [];
+                    if (readedNews.length > 0 && readedNews[0].length>0) {
+                        readedList = readedNews[0];
+                    }
+                    if(readedList.indexOf(params.info.key)<0){
+                        readedList.push(params.info.key)
+                        storage.save({
+                            key: 'readedNews',
+                            id: 2,
+                            data: readedList,
+                            expires: null,
+                        })
+                    }
+                    
+                });
             }
-            if(readedList.indexOf(params.info.key)<0){
-                readedList.push(params.info.key)
-                storage.save({
-                    key: 'readedNews',
-                    id: 2,
-                    data: readedList,
-                    expires: null,
-                })
-            }
-            
-        });
+        }
+        catch(err){
+            ToastAndroid.show('程序出错', ToastAndroid.SHORT);
+        }
 
     }
 

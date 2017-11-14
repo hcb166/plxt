@@ -7,6 +7,7 @@ import {
     View,
     Text,
     Button,
+    ToastAndroid,
     Image,
 } from 'react-native';
 import Dimensions from 'Dimensions';
@@ -22,15 +23,20 @@ export default class LoginSucess extends Component {
     }
 
     componentDidMount() {
-        // 读取本地数据 查看是否存在历史登录数据
-        storage.getAllDataForKey('serverIP').then((serverIP) => {
-            if (serverIP.length < 1) { return}
-            let ip = serverIP[0].ip;
-            let port = serverIP[0].port;
-            if (ip && port) {
-                this.setState({address: 'http://'+ip+':'+port})
-            }
-        }); 
+        try {
+            // 读取本地数据 查看是否存在历史登录数据
+            storage.getAllDataForKey('serverIP').then((serverIP) => {
+                if (serverIP.length < 1) { return}
+                let ip = serverIP[0].ip;
+                let port = serverIP[0].port;
+                if (ip && port) {
+                    this.setState({address: 'http://'+ip+':'+port})
+                }
+            }); 
+        }
+        catch(err) {
+            ToastAndroid.show('程序出错', ToastAndroid.SHORT);
+        }
     }
 
     render(){

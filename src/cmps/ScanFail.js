@@ -26,7 +26,7 @@ export default class LoginFail extends Component {
             <View style={{backgroundColor:'#e3e3e3'}}>
                 <TopBar />
                 <View style={styles.container}>
-                    <NavBar onPress={() => {this.props.navigation.navigate('Detail');}} title='扫码错误' NavRight={
+                    <NavBar onPress={() => {this.props.navigation.navigate('Detail',{info:'scanFail'});}} title='扫码错误' NavRight={
                         <Text></Text>
                     } />
                     <View style={styles.content}>

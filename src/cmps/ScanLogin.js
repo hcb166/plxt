@@ -8,6 +8,7 @@ import {
     Text,
     View,
     Image,
+    Vibration,
     Alert,
     TouchableHighlight,
     ToastAndroid,
@@ -16,7 +17,8 @@ import {
 import { StackNavigator } from 'react-navigation';
 import Dimensions from 'Dimensions';
 const { width, height } = Dimensions.get('window');
-import QRCodeScanner from 'react-native-qrcode-scanner';
+// import QRCodeScanner from 'react-native-qrcode-scanner';
+import Camera from 'react-native-camera';
 import TopBar from '../utils/TopBar';
 import NavBar from '../utils/NavBar';
 // import Storage from 'react-native-storage';
@@ -26,16 +28,16 @@ class ScanPointer extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            y: new Animated.Value(-300), 
+            y: new Animated.Value(-400), 
         };
     }
     componentDidMount() {
-        this.state.y.setValue(-300)
+        this.state.y.setValue(-400)
         Animated.timing( 
             this.state.y, 
             {
-                toValue: -100, 
-                duration: 2500,
+                toValue: -200, 
+                duration: 2000,
             }
         ).start(() => this.componentDidMount()); 
     }
@@ -57,6 +59,7 @@ class ScanPointer extends Component {
 class ScanLoginScreen extends Component {
     onSuccess(e) {
         // 读取到数据后需要发送请求到后台判断能否成功
+        Vibration.vibrate();
         const URL = 'http://'+e.data;
         const ip = e.data.split(':')[0];
         const port = e.data.split(':')[1];
@@ -80,20 +83,79 @@ class ScanLoginScreen extends Component {
                     expires: null,
                 })
                 ToastAndroid.show('登录成功', ToastAndroid.SHORT);
-                this.props.navigation.navigate('ScanLoginSuccess');
+                setTimeout(() => {this.props.navigation.navigate('ScanLoginSuccess')},300);
             }).catch((error) => {
                 ToastAndroid.show(error.message, ToastAndroid.SHORT);
-                this.props.navigation.navigate('ScanLoginFail');
+                setTimeout(() => {this.props.navigation.navigate('ScanLoginFail')},300);
             })
         }
 
 
     }
-
+    state = {
+        scanning: false,
+    }
     componentDidMount() {
         
     }
+    
+    _handleBarCodeRead(e) {
+        setTimeout(() => {
+            if (!this.state.scanning) {
+                this.onSuccess(e);
+                this.setState({scanning:true})
+            }else{
+                return
+            }
+        },300)
 
+    }
+
+
+    // render() {
+    //     return (
+    //         <View>
+    //             <TopBar />
+    //             <View style={{backgroundColor: "#666f76"}}>
+    //                 <NavBar onPress={() => {this.props.navigation.navigate('ScanLogin');}} title='扫描登录' NavRight={
+    //                 <Text></Text>
+    //                 } />
+    //                 <View style={{backgroundColor:"#fff",height:height-120,}}>
+
+    //                     <QRCodeScanner
+    //                         onRead={this.onSuccess.bind(this)}
+    //                         containerStyle={{
+    //                             backgroundColor: '#666f76',
+    //                             alignItems: 'center',
+    //                         }}
+    //                         cameraStyle={{
+    //                             width: 200,
+    //                             height: 200,
+    //                         }}
+    //                         fadeIn={true}
+    //                         reactivateTimeout={200}
+    //                         showMarker={true}
+    //                         customMarker={
+    //                             <View style={styles.rectangleContainer}>
+    //                                 <Image style={{top:100,width:200,height:200}} source={require('../imgs/scan_corner.png')} />
+    //                                 <ScanPointer style={{top:0}} />
+    //                             </View>
+    //                         }
+    //                         topContent={(
+    //                             <Text style={styles.centerText}>扫码连接服务器</Text>
+    //                         )}
+    //                         topViewStyle={{flex: 1}}
+    //                         bottomViewStyle={{}}
+    //                         bottomContent={(
+    //                             <Text style={{color:'#fff',fontSize:13}}>请对准二维码/条码，耐心等待</Text>
+    //                         )}
+    //                     />
+    //                 </View>
+    //             </View>
+    //         </View>
+    //     );
+    // }
+    
     render() {
         return (
             <View>
@@ -102,41 +164,28 @@ class ScanLoginScreen extends Component {
                     <NavBar onPress={() => {this.props.navigation.navigate('ScanLogin');}} title='扫描登录' NavRight={
                     <Text></Text>
                     } />
-                    <View style={{backgroundColor:"#fff",height:height-120,}}>
-
-                        <QRCodeScanner
-                            onRead={this.onSuccess.bind(this)}
-                            containerStyle={{
-                                backgroundColor: '#666f76',
-                                alignItems: 'center',
+                    <View style={{flexDirection:'row',justifyContent:'center',height:height-120,}}>
+                        <Camera
+                            ref={(cam) => {
+                            this.camera = cam;
                             }}
-                            cameraStyle={{
-                                width: 200,
-                                height: 200,
-                            }}
-                            fadeIn={true}
-                            reactivateTimeout={200}
-                            showMarker={true}
-                            customMarker={
-                                <View style={styles.rectangleContainer}>
-                                    <Image style={{top:100,width:200,height:200}} source={require('../imgs/scan_corner.png')} />
-                                    <ScanPointer style={{top:0}} />
-                                </View>
-                            }
-                            topContent={(
-                                <Text style={styles.centerText}>扫码连接服务器</Text>
-                            )}
-                            topViewStyle={{flex: 1}}
-                            bottomViewStyle={{}}
-                            bottomContent={(
-                                <Text style={{color:'#fff',fontSize:13}}>请对准二维码/条码，耐心等待</Text>
-                            )}
-                        />
+                            style={styles.preview}
+                            // onBarCodeRead={this.onSuccess.bind(this)}
+                            onBarCodeRead={this._handleBarCodeRead.bind(this)}
+                        >
+                        <View style={styles.rectangleContainer}>
+                            <View style={styles.rectangle}>
+                                <Image style={{width:200,height:200,resizeMode:'center'}} source={require('../imgs/scan_corner.png')} />
+                                <ScanPointer />
+                            </View>
+                        </View>
+                        </Camera>
+                        
                     </View>
                 </View>
             </View>
         );
-  }
+    }
 }
 
             
@@ -169,6 +218,12 @@ const styles = StyleSheet.create({
     height: 200,
     width: 200,
     backgroundColor: 'transparent',
+  },
+// camera组件样式
+  preview: {
+    width: 200,
+    height: 200,
+    marginTop: height/2-190,//居中+向下偏移30
   },
 });
 
