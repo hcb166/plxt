@@ -16,7 +16,7 @@ export default class TopBar extends Component {
         // 读取本地数据 查看是否存在历史登录数据
         storage.getAllDataForKey('serverIP').then((serverIP) => {
             if (serverIP.length < 1) { return}
-            let device = serverIP[0].device;
+            let device = serverIP[0].device_name;
             if (device) {
                 this.setState({device: device})
             }

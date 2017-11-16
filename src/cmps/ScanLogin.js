@@ -22,7 +22,7 @@ import Camera from 'react-native-camera';
 import TopBar from '../utils/TopBar';
 import NavBar from '../utils/NavBar';
 // import Storage from 'react-native-storage';
-import Axios from 'axios';
+import FetchFunc from '../utils/Fetch';
 
 class ScanPointer extends Component {
     constructor(props) {
@@ -70,27 +70,43 @@ class ScanLoginScreen extends Component {
             this.props.navigation.navigate('ScanLoginFail');
             return ;
         }else{
-            Axios.get(URL+'/Name')
-            .then((response) => {
-                storage.save({
-                    key: 'serverIP',
-                    id: 1,
-                    data: {
-                        ip: ip,
-                        port: port,
-                        device: response.data,
-                    },
-                    expires: null,
+            if (this.CheckIP(ip) && this.CheckPort(port)){
+                FetchFunc('http://'+ip+':'+port+'/pollen/v1/device_login', {
+                }).then((response) => response.json())
+                .then((responseJson) => {
+                    storage.save({
+                        key: 'serverIP',
+                        id: 1,
+                        data: {
+                            ip: ip,
+                            port: port,
+                            device: responseJson.code,
+                            device_name: responseJson.name,
+                        },
+                        expires: null,
+                    })
+                    ToastAndroid.show('登录成功', ToastAndroid.SHORT);
+                    this.props.navigation.navigate('ScanLoginSuccess');
+                }).catch((error) => {
+                    ToastAndroid.show(error.message, ToastAndroid.SHORT);
+                    this.props.navigation.navigate('ScanLoginFail');
                 })
-                ToastAndroid.show('登录成功', ToastAndroid.SHORT);
-                setTimeout(() => {this.props.navigation.navigate('ScanLoginSuccess')},300);
-            }).catch((error) => {
-                ToastAndroid.show(error.message, ToastAndroid.SHORT);
-                setTimeout(() => {this.props.navigation.navigate('ScanLoginFail')},300);
-            })
+            }else{
+                ToastAndroid.show("无效地址", ToastAndroid.SHORT);
+                this.props.navigation.navigate('ScanLoginFail');
+            }
         }
 
 
+    }
+
+    CheckIP(ip) {   
+        var re =  /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/;  
+        return re.test(ip);   
+    }
+    CheckPort(port) {   
+        var re =  /^([0-9]|[1-9]\d|[1-9]\d{2}|[1-9]\d{3}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/;  
+        return re.test(port);   
     }
     state = {
         scanning: false,
@@ -111,80 +127,50 @@ class ScanLoginScreen extends Component {
 
     }
 
-
-    // render() {
-    //     return (
-    //         <View>
-    //             <TopBar />
-    //             <View style={{backgroundColor: "#666f76"}}>
-    //                 <NavBar onPress={() => {this.props.navigation.navigate('ScanLogin');}} title='扫描登录' NavRight={
-    //                 <Text></Text>
-    //                 } />
-    //                 <View style={{backgroundColor:"#fff",height:height-120,}}>
-
-    //                     <QRCodeScanner
-    //                         onRead={this.onSuccess.bind(this)}
-    //                         containerStyle={{
-    //                             backgroundColor: '#666f76',
-    //                             alignItems: 'center',
-    //                         }}
-    //                         cameraStyle={{
-    //                             width: 200,
-    //                             height: 200,
-    //                         }}
-    //                         fadeIn={true}
-    //                         reactivateTimeout={200}
-    //                         showMarker={true}
-    //                         customMarker={
-    //                             <View style={styles.rectangleContainer}>
-    //                                 <Image style={{top:100,width:200,height:200}} source={require('../imgs/scan_corner.png')} />
-    //                                 <ScanPointer style={{top:0}} />
-    //                             </View>
-    //                         }
-    //                         topContent={(
-    //                             <Text style={styles.centerText}>扫码连接服务器</Text>
-    //                         )}
-    //                         topViewStyle={{flex: 1}}
-    //                         bottomViewStyle={{}}
-    //                         bottomContent={(
-    //                             <Text style={{color:'#fff',fontSize:13}}>请对准二维码/条码，耐心等待</Text>
-    //                         )}
-    //                     />
-    //                 </View>
-    //             </View>
-    //         </View>
-    //     );
-    // }
-    
     render() {
-        return (
-            <View>
-                <TopBar />
-                <View style={{backgroundColor: "#666f76"}}>
-                    <NavBar onPress={() => {this.props.navigation.navigate('ScanLogin');}} title='扫描登录' NavRight={
-                    <Text></Text>
-                    } />
-                    <View style={{flexDirection:'row',justifyContent:'center',height:height-120,}}>
-                        <Camera
-                            ref={(cam) => {
-                            this.camera = cam;
-                            }}
-                            style={styles.preview}
-                            // onBarCodeRead={this.onSuccess.bind(this)}
-                            onBarCodeRead={this._handleBarCodeRead.bind(this)}
-                        >
-                        <View style={styles.rectangleContainer}>
-                            <View style={styles.rectangle}>
-                                <Image style={{width:200,height:200,resizeMode:'center'}} source={require('../imgs/scan_corner.png')} />
-                                <ScanPointer />
+        if (!this.state.scanning){
+            return (
+                <View>
+                    <TopBar />
+                    <View style={{backgroundColor: "transparent"}}>
+                        <NavBar onPress={() => {this.props.navigation.navigate('ScanLogin');}} title='扫描登录' NavRight={
+                        <Text></Text>
+                        } />
+                        <View style={{backgroundColor:'rgba(0,0,0,0.1)',flexDirection:'row',justifyContent:'center',height:height-120,}}>
+                            <Camera
+                                ref={(cam) => {
+                                this.camera = cam;
+                                }}
+                                style={styles.preview}
+                                // onBarCodeRead={this.onSuccess.bind(this)}
+                                onBarCodeRead={this._handleBarCodeRead.bind(this)}
+                            >
+                            <View style={styles.rectangleContainer}>
+                                <View style={styles.rectangle}>
+                                    <Image style={{width:200,height:200,resizeMode:'center'}} source={require('../imgs/scan_corner.png')} />
+                                    <ScanPointer />
+                                </View>
                             </View>
+                            </Camera>
+                            
                         </View>
-                        </Camera>
-                        
                     </View>
                 </View>
-            </View>
-        );
+            );
+        }else{
+            return(
+                <View>
+                    <TopBar />
+                    <View style={{backgroundColor: "transparent"}}>
+                        <NavBar onPress={() => {this.props.navigation.navigate('ScanLogin');}} title='扫描登录' NavRight={
+                        <Text></Text>
+                        } />
+                        <View style={{backgroundColor:'rgba(0,0,0,0.1)',flexDirection:'row',justifyContent:'center',height:height-120,}}>
+                        </View>
+                    </View>
+                </View>
+            )
+        }
     }
 }
 

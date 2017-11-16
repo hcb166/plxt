@@ -13,10 +13,10 @@ import {
 import { TabNavigator } from 'react-navigation';
 import Storage from 'react-native-storage';
 import TopBar from '../utils/TopBar';
-import Axios from 'axios';
 import Dimensions from 'Dimensions';
 const { width, height } = Dimensions.get('window');
 import SplashScreen from 'react-native-splash-screen'
+import FetchFunc from '../utils/Fetch';
 
 const storage = new Storage({
     size: 1000, //默认1000条  循环存储(超出则循环覆盖)
@@ -59,15 +59,17 @@ class InputLoginScreen extends Component {
     Login() {
         var ip = this.state.ip;
         var port = this.state.port;
-        Axios.get('http://'+ip+':'+port+'/Name')
-        .then((response) => {
+        FetchFunc('http://'+ip+':'+port+'/pollen/v1/device_login', {})
+        .then((response) => response.json())
+        .then((responseJson) => {
             storage.save({
                 key: 'serverIP',
                 id: 1,
                 data: {
                     ip: ip,
                     port: port,
-                    device: response.data,
+                    device: responseJson.code,
+                    device_name: responseJson.name,
                 },
                 expires: null,
             })
@@ -76,6 +78,7 @@ class InputLoginScreen extends Component {
         }).catch((error) => {
             ToastAndroid.show(error.message, ToastAndroid.SHORT);
         })
+
     }
     GetIPValue(ipval) {
         // ip验证
@@ -149,14 +152,13 @@ class ScanLoginScreen extends Component {
     Login() {
         // 需要发送请求 根据返回结果进行跳转
         if (this.state.host) {
-            
-            Axios.get(this.state.host+'/Name')
-                .then((response) => {
-                    ToastAndroid.show('登录成功', ToastAndroid.SHORT);
-                    this.props.navigation.navigate('Main');
-                }).catch((error) => {
-                    ToastAndroid.show(error.message, ToastAndroid.SHORT);
-                })
+            FetchFunc(this.state.host+'/pollen/v1/device_login',{})
+            .then((response) => {
+                ToastAndroid.show('登录成功', ToastAndroid.SHORT);
+                this.props.navigation.navigate('Main');
+            }).catch((error) => {
+                ToastAndroid.show(error.message, ToastAndroid.SHORT);
+            })
         }
     }
 

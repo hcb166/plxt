@@ -16,11 +16,11 @@ const { width, height } = Dimensions.get('window');
 
 class Urgent extends Component {
     render() {
-        const isTrue = this.props.ergent;
+        const isTrue = this.props.priority;
         if (isTrue) {
             return(
                 <Image 
-                    style={{ width:25,height:30,resizeMode:'center'}} 
+                    style={{ width:23,height:30,resizeMode:'center'}} 
                     source={require('../imgs/flag.png')} 
                 />
             )
@@ -31,23 +31,43 @@ class Urgent extends Component {
 }
 
 class Material extends Component {
-
+    constructor(props) {
+        super(props);
+    }
     render() {
+        
         return (
             <View style={{justifyContent:'flex-start'}}>
-                <Text style={{color:'#535353',fontSize: 14}}>{this.props.product}</Text>
-                <Text style={{fontSize:11}}>{this.props.code}</Text>
+                <Text style={{color:'#535353',fontSize: 14}}>{this.props.worklinename}</Text>
+                <Text style={{fontSize:11}}>{this.props.packagingname}</Text>
             </View>
         )
     }
 }
 
 class Sta extends Component {
+    state = {
+        clr: '#2193f3',
+    }
     constructor(props) {
         super(props);
     }
 
+    componentDidMount() {
+        switch(this.props.status) {
+            case "正常完成": 
+                this.setState({clr:'#1eb852'});
+                break;
+            case "取消订单":
+                this.setState({clr:'#f71313'});
+                break;
+            default:
+                break;
+        }
+    }
+
     render() {
+        
         if (this.props.robot) {
             return (
                 <View>
@@ -57,7 +77,7 @@ class Sta extends Component {
                         alignItems: 'center',
                         justifyContent: 'flex-start',
                     }}>
-                        <Text style={{color:'#ff8800',fontSize: 14,}}>{this.props.status}</Text>
+                        <Text style={[{fontSize: 14,},{color:this.state.clr}]}>{this.props.status}</Text>
                         <View style={{
                                 flexDirection:'row',
                                 alignItems: 'center',
@@ -66,12 +86,12 @@ class Sta extends Component {
                             <Text style={{marginLeft:5,marginRight:5}}>
                                 <Image style={{width:30,height:20,resizeMode:'center'}} source={require('../imgs/car.png')} />  
                             </Text>  
-                            <Text style={{color:'#535353',fontSize: 14}}>
+                            <Text style={[{fontSize: 14,},{color:this.state.clr}]}>
                                 {this.props.robot}
                             </Text>
                         </View>
                     </View>
-                    <Text style={{fontSize:11}}>2017-08-31 13:28:41</Text>
+                    <Text style={{fontSize:11}}>{this.props.createstamp}</Text>
                 </View>
             )
         }else{
@@ -82,10 +102,10 @@ class Sta extends Component {
                         flexDirection:'row',
                         alignItems: 'center',
                     }}>
-                        <Text style={{color:'#ff8800',fontSize: 14}}>{this.props.status}</Text>
+                        <Text style={[{fontSize: 14,},{color:this.state.clr}]}>{this.props.status}</Text>
                         <View style={{}}></View>
                     </View>
-                    <Text style={{fontSize:11}}>2017-08-31 13:28:41</Text>
+                    <Text style={{fontSize:11}}>{this.props.createstamp}</Text>
                 </View>
             ) 
         }
@@ -128,30 +148,37 @@ export default class Item extends Component {
     }
 
     render() {
-        return(
-                <View style={styles.item}>
-                    <View style={{flex:1,}}>
-                        <Index index={this.props.data.index} readed={this.props.data.readed} />
+        if(this.props.data.key !== "nodata"){
+            return(
+                    <View style={styles.item}>
+                        <View style={{flex:1,}}>
+                            <Index index={this.props.data.index} readed={this.props.data.readed} />
+                        </View>
+                        <View  style={{flex:4,}}>
+                            <Material 
+                                worklinename={this.props.data.workline_name}  
+                                packagingname={this.props.data.packaging_name}  
+                            />
+                        </View>
+                        <View  style={{flex:5,}}>
+                            <Sta 
+                                status={this.props.data.state_name} 
+                                robot={this.props.data.robot_code} 
+                                createstamp={this.props.data.create_stamp} 
+                            />
+                        </View>
+                        <View  style={{flex:1,alignItems:'flex-end'}}>
+                            <Urgent priority={this.props.data.priority} />
+                        </View>
                     </View>
-                    <View  style={{flex:4,}}>
-                        <Material 
-                            product={this.props.data.product}  
-                            code={this.props.data.code}  
-                        />
-                    </View>
-                    <View  style={{flex:5,}}>
-                        <Sta 
-                            status={this.props.data.status} 
-                            robot={this.props.data.robot} 
-                        />
-                    </View>
-                    <View  style={{flex:1,alignItems:'flex-end'}}>
-                        <Urgent ergent={this.props.data.ergent} />
-                    </View>
+            )
+        }else{
+            return(
+                <View style={{flex:1,alignItems:'center'}}>
+                    <Text style={{margin:20}}>暂无数据</Text>
                 </View>
-
-            
-        )
+            )
+        }
     }
 }
 

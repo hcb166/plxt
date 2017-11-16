@@ -48,7 +48,7 @@ export default class LoginSucess extends Component {
                         <Text></Text>
                     } />
                     <View style={styles.content}>
-                        <Text style={styles.text}>扫码登录成功</Text>
+                        <Text style={styles.text}>扫码成功</Text>
                         <Text style={styles.text}>{this.state.address}</Text>
                         <View style={{marginTop: 50}}>
                             <Button color='#42a91c' onPress={() => {this.props.navigation.navigate('Main');}} title=' 登 录 ' />

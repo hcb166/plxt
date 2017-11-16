@@ -22,8 +22,7 @@ import Camera from 'react-native-camera';
 import TopBar from '../utils/TopBar';
 import NavBar from '../utils/NavBar';
 // import Storage from 'react-native-storage';
-import Axios from 'axios';
-
+import FetchFunc from '../utils/Fetch';
 class ScanPointer extends Component {
     constructor(props) {
         super(props);
@@ -57,38 +56,60 @@ class ScanPointer extends Component {
 
 
 class ScanScreen extends Component {
+    constructor(props) {
+        super(props);
+    }
+    address = '';
+    devicecode = '';
+
     onSuccess(e) {
         // 读取到数据后需要发送请求到后台判断能否成功
         Vibration.vibrate();
-        const URL = 'http://'+e.data;
-        const ip = e.data.split(':')[0];
-        const port = e.data.split(':')[1];
-        Axios.get(URL+'/Name')
-        .then((response) => {
-            storage.save({
-                key: 'serverIP',
-                id: 1,
-                data: {
-                    ip: ip,
-                    port: port,
-                    device: response.data,
-                },
-                expires: null,
-            })
-            ToastAndroid.show('扫描成功', ToastAndroid.SHORT);
-            setTimeout(() => {this.props.navigation.navigate('ScanSuccess')},300);
-        }).catch((error) => {
-            ToastAndroid.show(error.message, ToastAndroid.SHORT);
-            setTimeout(() => {this.props.navigation.navigate('ScanFail')},300);
-        })
-
+        
+        // 读取本地数据 查看是否存在历史登录数据
+        storage.getAllDataForKey('serverIP').then((serverIP) => {
+            if (serverIP.length < 1) { return}
+            let ip = serverIP[0].ip;
+            let port = serverIP[0].port;
+            let device_code = serverIP[0].device;
+            if (ip && port && device_code) {
+                this.address = 'http://'+ip+':'+port;
+                this.devicecode = device_code;
+                // 请求交互 
+                this.bindStation(e.data);
+            }else{
+                ToastAndroid.show('获取地址失败', ToastAndroid.SHORT);
+                const { params } = this.props.navigation.state;
+                this.props.navigation.navigate('Detail',{info:params.info})
+            }
+        });
     }
     state = {
         scanning: false,
     }
     
+    bindStation(station) {
+
+        const {params} = this.props.navigation.state;
+        FetchFunc(this.address+'/pollen/v1/update_material_bill', {
+            "user": this.devicecode,
+            "flag": 2,
+            
+        })
+        .then((response) => response.json())
+        .then((responseJson) => {
+            
+            ToastAndroid.show('扫描成功', ToastAndroid.SHORT);
+            setTimeout(() => {this.props.navigation.navigate('ScanSuccess',{code:station,info:params.info})},300);
+        }).catch((error) => {
+            ToastAndroid.show(error.message, ToastAndroid.SHORT);
+            setTimeout(() => {this.props.navigation.navigate('ScanFail',{info:params.info})},300);
+        })
+    }
+
     componentDidMount() {
-        
+    }
+    componentWillUnmount() {
     }
 
     _handleBarCodeRead(e) {
@@ -103,76 +124,51 @@ class ScanScreen extends Component {
 
     }
 
-    // render() {
-    //     return (
-    //         <View>
-    //             <TopBar />
-    //             <View style={{backgroundColor: "#666f76"}}>
-    //                 <NavBar onPress={() => {this.props.navigation.navigate('Detail',{info:'scan'});}} title='扫描站点条码' NavRight={
-    //                 <Text></Text>
-    //                 } />
-    //                 <View style={{backgroundColor:"#fff",height:height-120,}}>
 
-    //                     <QRCodeScanner
-    //                         onRead={this.onSuccess.bind(this)}
-    //                         containerStyle={{
-    //                             backgroundColor: '#666f76',
-    //                             alignItems: 'center',
-    //                         }}
-    //                         cameraStyle={{
-    //                             width: 200,
-    //                             height: 200,
-    //                         }}
-    //                         // fadeIn={true}
-    //                         showMarker={true}
-    //                         customMarker={
-    //                             <View style={styles.rectangleContainer}>
-    //                                 <Image style={{top:100,width:200,height:200}} source={require('../imgs/scan_corner.png')} />
-    //                                 <ScanPointer style={{top:0}} />
-    //                             </View>
-    //                         }
-    //                         topContent={(
-    //                             <Text style={styles.centerText}>扫码绑定站点</Text>
-    //                         )}
-    //                         topViewStyle={{flex: 1}}
-    //                         bottomContent={(
-    //                             <Text style={{color:'#fff',fontSize:13}}>请对准二维码/条码，耐心等待</Text>
-    //                         )}
-    //                     />
-    //                 </View>
-    //             </View>
-    //         </View>
-    //     );
-    // }
+
     render() {
-        return (
-            <View>
-                <TopBar />
-                <View style={{backgroundColor: "#666f76"}}>
-                    <NavBar onPress={() => {this.props.navigation.navigate('Detail',{info:'scan'});}} title='扫描站点条码' NavRight={
-                    <Text></Text>
-                    } />
-                    <View style={{flexDirection:'row',justifyContent:'center',height:height-120,}}>
-                        <Camera
-                            ref={(cam) => {
-                            this.camera = cam;
-                            }}
-                            style={styles.preview}
-                            // onBarCodeRead={this.onSuccess.bind(this)}
-                            onBarCodeRead={this._handleBarCodeRead.bind(this)}
-                        >
-                        <View style={styles.rectangleContainer}>
-                            <View style={styles.rectangle}>
-                                <Image style={{width:200,height:200,resizeMode:'center'}} source={require('../imgs/scan_corner.png')} />
-                                <ScanPointer />
+        const { params } = this.props.navigation.state;
+        if (!this.state.scanning) {
+            return (
+                <View>
+                    <TopBar />
+                    <View style={{backgroundColor: "transparent"}}>
+                        <NavBar onPress={() => {this.props.navigation.navigate('Detail',{info:params.info})}} title='扫描站点条码' NavRight={
+                        <Text></Text>
+                        } />
+                        <View style={{backgroundColor:'transparent',flexDirection:'row',justifyContent:'center',height:height-120,}}>
+                            <Camera
+                                ref={(cam) => {
+                                this.camera = cam;
+                                }}
+                                style={styles.preview}
+                                onBarCodeRead={this._handleBarCodeRead.bind(this)}
+                            >
+                            <View style={styles.rectangleContainer}>
+                                <View style={styles.rectangle}>
+                                    <Image style={{width:200,height:200,resizeMode:'center'}} source={require('../imgs/scan_corner.png')} />
+                                    <ScanPointer />
+                                </View>
                             </View>
+                            </Camera>
                         </View>
-                        </Camera>
-                        
                     </View>
                 </View>
-            </View>
-        );
+            );
+        }else{
+            return (
+                <View>
+                    <TopBar />
+                    <View style={{backgroundColor: "transparent"}}>
+                        <NavBar onPress={() => {this.props.navigation.navigate('Detail',{info:params.info})}} title='扫描站点条码' NavRight={
+                        <Text></Text>
+                        } />
+                        <View style={{backgroundColor:'transparent',flexDirection:'row',justifyContent:'center',height:height-120,}}>
+                        </View>
+                    </View>
+                </View>
+            );
+        }
     }
 }
 

@@ -8,12 +8,13 @@ import {
     FlatList,
     TouchableHighlight,
 } from 'react-native';
-import Axios from 'axios';
 import Item from './Item';
 import TopBar from '../utils/TopBar';
+import FetchFunc from '../utils/Fetch';
 
 import Dimensions from 'Dimensions';
 const { width, height } = Dimensions.get('window');
+
 
 class MainScree extends Component {
     state = {
@@ -21,18 +22,22 @@ class MainScree extends Component {
         data: [],
     };
     address = '';
+    devicecode: '';
     componentDidMount() {
         // 读取本地数据 查看是否存在历史登录数据
         storage.getAllDataForKey('serverIP').then((serverIP) => {
             if (serverIP.length < 1) { return}
             let ip = serverIP[0].ip;
             let port = serverIP[0].port;
-            if (ip && port) {
+            let device_code = serverIP[0].device;
+            if (ip && port && device_code) {
                 this.address = 'http://'+ip+':'+port;
+                this.devicecode = device_code;
                 this.getData();
             }
+            this.timer = setInterval(() => this.getData(), 1000);
         });
-        this.timer = setInterval(() => this.getData(), 1000);
+
 
     }
 
@@ -42,58 +47,72 @@ class MainScree extends Component {
     }
     
     getData() {
-        // 已读信息只在页面初始时获取一次 避免过多的storage读操作  必须先读取
+        // 已读信息必须实时更新 且必须先读取
         storage.getAllDataForKey('readedNews').then((readedNews) => {
             let readedList = [];
             if (readedNews.length > 0 && readedNews[0].length>0) {
                 readedList = readedNews[0];
             }
-            Axios.get(this.address+'/hello')
-            .then((response) => {
+            
+            FetchFunc(this.address+'/pollen/v1/update_material_bill', {
+                "user": this.devicecode,
+                "flag": 3,
+                "item_per_page": -1
+            }).then((response) => response.json())
+            .then((responseJson) => {
                 // 添加数据过滤功能
-                let filterCondition = this.state.text;
-                let arr = [];
-                if (filterCondition) {
-                    response.data.data.forEach(function(val){
-                        if (val.index == filterCondition) {
-                            arr.push(val)
-                        }
-                    })
+                console.log(responseJson.bills)
+                if(responseJson.bills){
+
+                    // 添加已读和未读功能
+                    // 基本逻辑：
+                    // 已读信息缓存到本地
+                    // 获取最新数据后需要更新本地已读信息数据(子集)，保证缓存数据不会越来越大
+                    // 每条需要根据key的唯一性进行匹配
+                    // if(readedList.length>0) {
+                        let dataKeys = [];
+                        let res_arr = responseJson.bills;
+                        res_arr.forEach(function(value,index){
+                            dataKeys.push(value["code"]);
+                            if(readedList.indexOf(value["code"]) >= 0) {
+                                res_arr[index]['readed'] = 1;
+                            }else{
+                                res_arr[index]['readed'] = 0;
+                            }
+                            res_arr[index]["key"] = value["code"];
+                            res_arr[index]["index"] = index+1;
+                        })
+
+                        // 同时更新本地readNews信息 如果readNews中的信息不再当前数据中则清除
+                        readedList.forEach(function(val,index){
+                            if(dataKeys.indexOf(val) < 0) {
+                                readedList.splice(index, 1);
+                            }
+                        })
+                        storage.save({
+                            key: 'readedNews',
+                            id: 2,
+                            data: readedList,
+                            expires: null,
+                        })
+
+                    let filterCondition = this.state.text;
+                    let arr = [];
+                    if (filterCondition) {
+                        responseJson.bills.forEach(function(val){
+                            // 查询条件
+                            if (val.workline_name.toLowerCase().indexOf(filterCondition.toLowerCase())>=0) {
+                                arr.push(val)
+                            }
+                        })
+                    }else{
+                        arr = responseJson.bills;
+                    }
+                    // }
+                    this.setState({data:arr})
                 }else{
-                    arr = response.data.data;
+                    this.setState({data:[{key:'nodata'}]})
                 }
-
-                // 添加已读和未读功能
-                // 基本逻辑：
-                // 已读信息缓存到本地
-                // 获取最新数据后需要更新本地已读信息数据(子集)，保证缓存数据不会越来越大
-                // 每条需要根据key的唯一性进行匹配
-                // if(readedList.length>0) {
-                    let dataKeys = [];
-                    arr.forEach(function(value,index){
-                        dataKeys.push(value["key"]);
-                        if(readedList.indexOf(value["key"]) >= 0) {
-                            arr[index]['readed'] = 1;
-                        }else{
-                            arr[index]['readed'] = 0;
-                        }
-                    })
-
-                    readedList.forEach(function(val,index){
-                        if(dataKeys.indexOf(val) < 0) {
-                            readedList.splice(index, 1);
-                        }
-                    })
-                    // 同时更新本地readNews信息 如果readNews中的信息不再当前数据中则清除
-                    // storage.clearMapForKey('readedNews');
-                    storage.save({
-                        key: 'readedNews',
-                        id: 2,
-                        data: readedList,
-                        expires: null,
-                    })
-                // }
-                this.setState({data:arr})
             }).catch((error) => {
                 ToastAndroid.show(error.message, ToastAndroid.SHORT);
             })
@@ -102,8 +121,10 @@ class MainScree extends Component {
 
     
     _onPressItem(item) {
-        this.props.navigation.navigate('Detail',{info:item});
-        this.componentWillUnmount();
+        if(item.key !== "nodata"){
+            this.props.navigation.navigate('Detail',{info:item});
+            this.componentWillUnmount();
+        }
     }
 
     _renderItem = ({item}) => ( 
@@ -117,13 +138,9 @@ class MainScree extends Component {
         return <View style={{borderTopWidth:1,borderColor:'#cdcdcd'}}></View>
     } 
     _onRefresh() {
-        Axios.get(this.address+'/hello')
-        .then((response) => {
-            this.setState({data:response.data.data})
-            ToastAndroid.show('刷新成功', ToastAndroid.SHORT);
-        }).catch((error) => {
-            ToastAndroid.show(error.message, ToastAndroid.SHORT);
-        })
+        //如果使用 this.getData() 如何判断刷新成功？？？？？
+        this.getData();
+        ToastAndroid.show("刷新成功", ToastAndroid.SHORT);
     }
 
     render() {
