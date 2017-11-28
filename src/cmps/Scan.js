@@ -3,13 +3,11 @@
 import React, { Component } from 'react';
 
 import {
-    AppRegistry,
     StyleSheet,
     Text,
     Vibration,
     View,
     Image,
-    Alert,
     TouchableHighlight,
     ToastAndroid,
     Animated,
@@ -94,13 +92,21 @@ class ScanScreen extends Component {
         FetchFunc(this.address+'/pollen/v1/update_material_bill', {
             "user": this.devicecode,
             "flag": 2,
-            
+            "bill": {"code": params.info.code,
+                        "state_id": 2,
+                        "distribute_spot" : station,
+                        "workline_code": params.info.workline_code,
+                    }
         })
         .then((response) => response.json())
         .then((responseJson) => {
-            
-            ToastAndroid.show('扫描成功', ToastAndroid.SHORT);
-            setTimeout(() => {this.props.navigation.navigate('ScanSuccess',{code:station,info:params.info})},300);
+            if(responseJson.text) {
+                ToastAndroid.show(responseJson.text, ToastAndroid.SHORT);
+                setTimeout(() => {this.props.navigation.navigate('ScanFail',{info:params.info})},300);
+            }else{
+                ToastAndroid.show('扫描成功', ToastAndroid.SHORT);
+                setTimeout(() => {this.props.navigation.navigate('ScanSuccess',{code:station,info:params.info})},300);
+            }
         }).catch((error) => {
             ToastAndroid.show(error.message, ToastAndroid.SHORT);
             setTimeout(() => {this.props.navigation.navigate('ScanFail',{info:params.info})},300);
@@ -113,30 +119,30 @@ class ScanScreen extends Component {
     }
 
     _handleBarCodeRead(e) {
-        setTimeout(() => {
+        // setTimeout(() => {
             if (!this.state.scanning) {
                 this.onSuccess(e);
                 this.setState({scanning:true})
             }else{
                 return
             }
-        },300)
+        // },300)
 
     }
 
 
 
+    // <TopBar navigation={this.props.navigation} />
     render() {
         const { params } = this.props.navigation.state;
         if (!this.state.scanning) {
             return (
                 <View>
-                    <TopBar />
-                    <View style={{backgroundColor: "transparent"}}>
-                        <NavBar onPress={() => {this.props.navigation.navigate('Detail',{info:params.info})}} title='扫描站点条码' NavRight={
+                    <View style={{backgroundColor: "#6a737a"}}>
+                        <NavBar onPress={() => {this.setState({scanning:true});this.props.navigation.navigate('Detail',{info:params.info});}} title='扫描站点条码' NavRight={
                         <Text></Text>
                         } />
-                        <View style={{backgroundColor:'transparent',flexDirection:'row',justifyContent:'center',height:height-120,}}>
+                        <View style={{backgroundColor:'#6a737a',flexDirection:'row',justifyContent:'center',height:height-60,}}>
                             <Camera
                                 ref={(cam) => {
                                 this.camera = cam;
@@ -158,7 +164,7 @@ class ScanScreen extends Component {
         }else{
             return (
                 <View>
-                    <TopBar />
+                    <TopBar navigation={this.props.navigation} />
                     <View style={{backgroundColor: "transparent"}}>
                         <NavBar onPress={() => {this.props.navigation.navigate('Detail',{info:params.info})}} title='扫描站点条码' NavRight={
                         <Text></Text>

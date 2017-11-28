@@ -14,6 +14,7 @@ import Dimensions from 'Dimensions';
 const {width,height} = Dimensions.get('window');
 import TopBar from '../utils/TopBar';
 import NavBar from '../utils/NavBar';
+import { NavigationActions } from 'react-navigation'
 
 
 export default class LoginSucess extends Component {
@@ -38,11 +39,21 @@ export default class LoginSucess extends Component {
             ToastAndroid.show('程序出错', ToastAndroid.SHORT);
         }
     }
+    
+    _onPress() {
+        resetAction = NavigationActions.reset({
+            index: 0,
+            actions: [
+                NavigationActions.navigate({routeName:'Main'})//要跳转到的页面名字
+            ]
+        });
+        this.props.navigation.dispatch(resetAction);
+    }
 
     render(){
         return(
             <View style={{backgroundColor:'#e3e3e3'}}>
-                <TopBar />
+                <TopBar navigation={this.props.navigation} />
                 <View style={styles.container}>
                     <NavBar onPress={() => {this.props.navigation.navigate('Login');}} title='扫码成功' NavRight={
                         <Text></Text>
@@ -51,7 +62,7 @@ export default class LoginSucess extends Component {
                         <Text style={styles.text}>扫码成功</Text>
                         <Text style={styles.text}>{this.state.address}</Text>
                         <View style={{marginTop: 50}}>
-                            <Button color='#42a91c' onPress={() => {this.props.navigation.navigate('Main');}} title=' 登 录 ' />
+                            <Button color='#42a91c' onPress={this._onPress.bind(this)} title=' 登 录 ' />
                         </View>
                     </View>
                 </View>

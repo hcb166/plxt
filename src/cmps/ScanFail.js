@@ -25,7 +25,7 @@ export default class LoginFail extends Component {
         const { params } = this.props.navigation.state;
         return(
             <View style={{backgroundColor:'#e3e3e3'}}>
-                <TopBar />
+                <TopBar navigation={this.props.navigation} />
                 <View style={styles.container}>
                     <NavBar onPress={() => {this.props.navigation.navigate('Detail',{info:params.info});}} title='扫码错误' NavRight={
                         <Text></Text>

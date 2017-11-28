@@ -62,6 +62,10 @@ class InputLoginScreen extends Component {
         FetchFunc('http://'+ip+':'+port+'/pollen/v1/device_login', {})
         .then((response) => response.json())
         .then((responseJson) => {
+            if(responseJson.text){
+                ToastAndroid.show(responseJson.text, ToastAndroid.SHORT);
+                return
+            }
             storage.save({
                 key: 'serverIP',
                 id: 1,
@@ -94,7 +98,7 @@ class InputLoginScreen extends Component {
     render() {
         return(
             <View style={styles.container}>
-                <TopBar />
+                <TopBar navigation={this.props.navigation} />
                 <View style={styles.content}>
                     <View style={{height:200,justifyContent:'space-around',alignItems:'center'}}>
                         <View style={styles.inputcontainer}>
@@ -153,7 +157,12 @@ class ScanLoginScreen extends Component {
         // 需要发送请求 根据返回结果进行跳转
         if (this.state.host) {
             FetchFunc(this.state.host+'/pollen/v1/device_login',{})
-            .then((response) => {
+            .then((response) => response.json())
+            .then((responseJson) => {
+                if(responseJson.text){
+                    ToastAndroid.show(responseJson.text, ToastAndroid.SHORT);
+                    return
+                }
                 ToastAndroid.show('登录成功', ToastAndroid.SHORT);
                 this.props.navigation.navigate('Main');
             }).catch((error) => {

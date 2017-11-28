@@ -14,7 +14,7 @@ import {
     ToastAndroid,
     TouchableHighlight,
 } from 'react-native';
-
+import { NavigationActions } from 'react-navigation'
 import Dimensions from 'Dimensions';
 const { width, height } = Dimensions.get('window');
 
@@ -45,36 +45,61 @@ class BindStation extends Component {
     }
     
     render() {
-        return(
-            <View style={{ 
-                flexDirection:'row',
-                alignItems:'center',
-                justifyContent: 'space-between',
-            }}>
-                <View style={{
+        const { params } = this.props.navigation.state;
+        if (params.info.priority) {
+            return(
+                <View style={{ 
                     flexDirection:'row',
                     alignItems:'center',
-                    justifyContent: 'flex-end',
-                    marginRight: 20,
+                    justifyContent: 'space-between',
                 }}>
-                    <Text style={{fontSize:15,fontWeight:'500',color:'#535353',marginRight:10,}}>加急</Text>
-                    <Image style={{ width:25,height:30,resizeMode:'center'}} source={require('../imgs/flag.png')} />
-                </View>
-                <TouchableHighlight
-                    onPress={this._Press.bind(this)}
-                    underlayColor='transparent'
-                >
                     <View style={{
-                        flexDirection:'column',
+                        flexDirection:'row',
                         alignItems:'center',
-                        justifyContent: 'space-between',
+                        justifyContent: 'flex-end',
+                        marginRight: 20,
                     }}>
-                        <Image style={{ width:30,height:25,resizeMode:'center'}} source={require('../imgs/scanner_btn.png')} />
-                        <Text style={{fontSize:11}}>扫码绑定站点</Text>
+                        <Text style={{fontSize:15,fontWeight:'500',color:'#535353',marginRight:10,}}>加急</Text>
+                        <Image style={{ width:25,height:30,resizeMode:'center'}} source={require('../imgs/flag.png')} />
                     </View>
-                </TouchableHighlight>
-            </View>
-        )
+                    <TouchableHighlight
+                        onPress={this._Press.bind(this)}
+                        underlayColor='transparent'
+                    >
+                        <View style={{
+                            flexDirection:'column',
+                            alignItems:'center',
+                            justifyContent: 'space-between',
+                        }}>
+                            <Image style={{ width:30,height:25,resizeMode:'center'}} source={require('../imgs/scanner_btn.png')} />
+                            <Text style={{fontSize:11}}>扫码绑定站点</Text>
+                        </View>
+                    </TouchableHighlight>
+                </View>
+            )
+        }else{
+            return(
+                <View style={{ 
+                    flexDirection:'row',
+                    alignItems:'center',
+                    justifyContent: 'space-between',
+                }}>
+                    <TouchableHighlight
+                        onPress={this._Press.bind(this)}
+                        underlayColor='transparent'
+                    >
+                        <View style={{
+                            flexDirection:'column',
+                            alignItems:'center',
+                            justifyContent: 'space-between',
+                        }}>
+                            <Image style={{ width:30,height:25,resizeMode:'center'}} source={require('../imgs/scanner_btn.png')} />
+                            <Text style={{fontSize:11}}>扫码绑定站点</Text>
+                        </View>
+                    </TouchableHighlight>
+                </View>
+            )
+        }
     }
 }
 
@@ -89,7 +114,14 @@ export default class Details extends Component {
     }
     
     _onPress() {
-        this.props.navigation.navigate('Main');
+        resetAction = NavigationActions.reset({
+            index: 0,
+            actions: [
+                NavigationActions.navigate({routeName:'Main'})//要跳转到的页面名字
+            ]
+        });
+        this.props.navigation.dispatch(resetAction);
+        // this.props.navigation.navigate('Main');
     }
     
     state = {
@@ -129,7 +161,7 @@ export default class Details extends Component {
         const { params } = this.props.navigation.state;
         return(
             <View style={{backgroundColor:'#e3e3e3'}}>
-                <TopBar />
+                <TopBar navigation={this.props.navigation} />
                 <View style={styles.container}>
                     <View style={{borderRadius:6}}>
                         <NavBar 
@@ -229,7 +261,7 @@ class MaInfo extends Component {
                 </View>
                 <FlatList
                         style={{
-                            height: height - 225,
+                            height: height - 255,
                         }}
                         data={this.state.data}
                         renderItem={this._renderItem.bind(this)}
@@ -242,7 +274,7 @@ class MaInfo extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        height: height-80,
+        height: height-90,
         backgroundColor: '#fff',
         borderRadius: 6,
         margin: 6,

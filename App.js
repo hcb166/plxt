@@ -14,7 +14,6 @@ import {
 
 import { StackNavigator } from 'react-navigation';
 
-import LoginScreen from './src/cmps/Login';
 import MainScreen from './src/cmps/Main';
 import DetailScreen from './src/cmps/Details';
 import ScanLoginScreen from './src/cmps/ScanLogin';
@@ -24,15 +23,18 @@ import ScanLoginSuccessScreen from './src/cmps/ScanLoginSuccess';
 import ScanScreen from './src/cmps/Scan';
 import ScanFailScreen from './src/cmps/ScanFail';
 import ScanSuccessScreen from './src/cmps/ScanSuccess';
-
-
-
-
+import ConfigScreen from './src/cmps/Config';
 
 
 const RootNavigator = StackNavigator({
+    Main: {
+        screen: MainScreen,
+        navigationOptions: {
+            header: null,
+        }
+    },
     Login: {
-        screen: LoginScreen,
+        screen: ConfigScreen,
         navigationOptions: {
             header: null,
         } 
@@ -51,12 +53,6 @@ const RootNavigator = StackNavigator({
     },
     ScanLoginSuccess: {
         screen: ScanLoginSuccessScreen,
-        navigationOptions: {
-            header: null,
-        }
-    },
-    Main: {
-        screen: MainScreen,
         navigationOptions: {
             header: null,
         }
@@ -85,8 +81,6 @@ const RootNavigator = StackNavigator({
             header: null,
         }
     },
-
-
 })
 
 

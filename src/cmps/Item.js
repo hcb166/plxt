@@ -48,12 +48,14 @@ class Material extends Component {
 class Sta extends Component {
     state = {
         clr: '#2193f3',
+        robot: '',
     }
     constructor(props) {
         super(props);
     }
 
-    componentDidMount() {
+    componentWillMount() {
+        // "已分配车"  "搬运中"  的状态下才显示小车
         switch(this.props.status) {
             case "正常完成": 
                 this.setState({clr:'#1eb852'});
@@ -61,14 +63,26 @@ class Sta extends Component {
             case "取消订单":
                 this.setState({clr:'#f71313'});
                 break;
+            case "异常完成":
+                this.setState({clr:'#f71313'});
+                break;
+            case "已分配车":
+                this.setState({robot:this.props.robot});
+                break;
+            case "搬运中":
+                this.setState({robot:this.props.robot});
+                break;
             default:
+                this.setState({robot:''});
                 break;
         }
+
+
+
     }
 
     render() {
-        
-        if (this.props.robot) {
+        if (this.state.robot) {
             return (
                 <View>
                     <View 
@@ -154,13 +168,13 @@ export default class Item extends Component {
                         <View style={{flex:1,}}>
                             <Index index={this.props.data.index} readed={this.props.data.readed} />
                         </View>
-                        <View  style={{flex:4,}}>
+                        <View  style={{flex:3,}}>
                             <Material 
                                 worklinename={this.props.data.workline_name}  
                                 packagingname={this.props.data.packaging_name}  
                             />
                         </View>
-                        <View  style={{flex:5,}}>
+                        <View  style={{flex:6,}}>
                             <Sta 
                                 status={this.props.data.state_name} 
                                 robot={this.props.data.robot_code} 

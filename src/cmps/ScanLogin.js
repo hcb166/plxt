@@ -71,29 +71,40 @@ class ScanLoginScreen extends Component {
             return ;
         }else{
             if (this.CheckIP(ip) && this.CheckPort(port)){
-                FetchFunc('http://'+ip+':'+port+'/pollen/v1/device_login', {
-                }).then((response) => response.json())
-                .then((responseJson) => {
-                    storage.save({
-                        key: 'serverIP',
-                        id: 1,
-                        data: {
-                            ip: ip,
-                            port: port,
-                            device: responseJson.code,
-                            device_name: responseJson.name,
-                        },
-                        expires: null,
-                    })
-                    ToastAndroid.show('登录成功', ToastAndroid.SHORT);
-                    this.props.navigation.navigate('ScanLoginSuccess');
-                }).catch((error) => {
-                    ToastAndroid.show(error.message, ToastAndroid.SHORT);
-                    this.props.navigation.navigate('ScanLoginFail');
-                })
+                // FetchFunc('http://'+ip+':'+port+'/pollen/v1/device_login', {
+                // }).then((response) => response.json())
+                // .then((responseJson) => {
+                //     if(responseJson.text) {
+                //         ToastAndroid.show(responseJson.text, ToastAndroid.SHORT);
+                //         setTimeout(() => {this.props.navigation.navigate('ScanLoginFail')},300);
+                //         return
+                //     }
+                //     storage.save({
+                //         key: 'serverIP',
+                //         id: 1,
+                //         data: {
+                //             ip: ip,
+                //             port: port,
+                //             device: responseJson.code,
+                //             device_name: responseJson.name,
+                //         },
+                //         expires: null,
+                //     })
+                //     ToastAndroid.show('登录成功', ToastAndroid.SHORT);
+                //     // this.props.navigation.navigate('ScanLoginSuccess');
+                //     this.props.navigation.navigate('Login');
+                // }).catch((error) => {
+                //     ToastAndroid.show(error.message, ToastAndroid.SHORT);
+                //     this.props.navigation.navigate('ScanLoginFail');
+                // })
+                
+                    ToastAndroid.show('扫码成功', ToastAndroid.SHORT);
+                
+                    this.props.navigation.navigate('Login',{ip:ip,port:port});
+
             }else{
                 ToastAndroid.show("无效地址", ToastAndroid.SHORT);
-                this.props.navigation.navigate('ScanLoginFail');
+                setTimeout(() => {this.props.navigation.navigate('ScanLoginFail')},300);
             }
         }
 
@@ -127,16 +138,16 @@ class ScanLoginScreen extends Component {
 
     }
 
+    // <TopBar  navigation={this.props.navigation} />
     render() {
         if (!this.state.scanning){
             return (
                 <View>
-                    <TopBar />
-                    <View style={{backgroundColor: "transparent"}}>
-                        <NavBar onPress={() => {this.props.navigation.navigate('ScanLogin');}} title='扫描登录' NavRight={
+                    <View style={{backgroundColor: "#6a737a"}}>
+                        <NavBar onPress={() => {this.setState({scanning:true});this.props.navigation.navigate('Login');}} title='扫描登录' NavRight={
                         <Text></Text>
                         } />
-                        <View style={{backgroundColor:'rgba(0,0,0,0.1)',flexDirection:'row',justifyContent:'center',height:height-120,}}>
+                        <View style={{backgroundColor:'#6a737a',flexDirection:'row',justifyContent:'center',height:height-60,}}>
                             <Camera
                                 ref={(cam) => {
                                 this.camera = cam;
@@ -160,7 +171,7 @@ class ScanLoginScreen extends Component {
         }else{
             return(
                 <View>
-                    <TopBar />
+                    <TopBar  navigation={this.props.navigation} />
                     <View style={{backgroundColor: "transparent"}}>
                         <NavBar onPress={() => {this.props.navigation.navigate('ScanLogin');}} title='扫描登录' NavRight={
                         <Text></Text>
