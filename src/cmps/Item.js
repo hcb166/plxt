@@ -55,6 +55,7 @@ class Sta extends Component {
     }
 
     componentWillMount() {
+        // console.log(this.props.status,this.props.robot)
         // "已分配车"  "搬运中"  的状态下才显示小车
         switch(this.props.status) {
             case "正常完成": 
@@ -67,22 +68,23 @@ class Sta extends Component {
                 this.setState({clr:'#f71313'});
                 break;
             case "已分配车":
-                this.setState({robot:this.props.robot});
+                // this.setState({robot:this.props.robot});
                 break;
             case "搬运中":
-                this.setState({robot:this.props.robot});
+                // this.setState({robot:this.props.robot});
                 break;
             default:
-                this.setState({robot:''});
+                // this.setState({robot:''});
                 break;
         }
+        // console.log(this.state.robot)
 
 
 
     }
 
     render() {
-        if (this.state.robot) {
+        if (this.props.status == "已分配车" || this.props.status == "搬运中") {
             return (
                 <View>
                     <View 
