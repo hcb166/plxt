@@ -71,7 +71,7 @@ class MainScree extends Component {
                     "item_per_page": -1,
                 }).then((response) => response.json())
                 .then((responseJson) => {
-                    console.log(responseJson)
+                    // console.log(responseJson)
                     if(responseJson.text) {
                         ToastAndroid.show(responseJson.text, 1000);
                         return

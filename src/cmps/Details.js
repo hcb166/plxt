@@ -195,7 +195,7 @@ class MaInfo extends Component {
         // 传递过来的数据进行格式化
         let mtn = this.props.data.material_type_name.split(',');
         let mn = this.props.data.material_names.split(',');
-        let n = this.props.data.nums.split(',');
+        // let n = this.props.data.nums.split(',');
         let nr = this.props.data.num_remarks.split(',');
         let mun = this.props.data.material_unit_name.split(',');
         let mrn = this.props.data.material_rack_name.split(',');
@@ -205,7 +205,8 @@ class MaInfo extends Component {
             arr.push({
                 key: index,
                 col1: mtn[index]+'/'+mn[index],
-                col2: n[index]+'+'+nr[index]+mun[index],
+                // col2: n[index]+'+'+nr[index]+mun[index],
+                col2: nr[index]+mun[index],
                 col3: mrn[index],
             })
         })
