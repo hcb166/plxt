@@ -47,58 +47,89 @@ class BindStation extends Component {
     render() {
         const { params } = this.props.navigation.state;
         if (params.info.priority) {
-            return(
-                <View style={{ 
-                    flexDirection:'row',
-                    alignItems:'center',
-                    justifyContent: 'space-between',
-                }}>
-                    <View style={{
+            if(params.info.state_name == "配料中"){
+                return(
+                    <View style={{ 
                         flexDirection:'row',
                         alignItems:'center',
-                        justifyContent: 'flex-end',
-                        marginRight: 20,
+                        justifyContent: 'space-between',
                     }}>
-                        <Text style={{fontSize:15,fontWeight:'500',color:'#535353',marginRight:10,}}>加急</Text>
-                        <Image style={{ width:25,height:30,resizeMode:'center'}} source={require('../imgs/flag.png')} />
+                        <View style={{
+                            flexDirection:'row',
+                            alignItems:'center',
+                            justifyContent: 'flex-end',
+                            marginRight: 20,
+                        }}>
+                            <Text style={{fontSize:15,fontWeight:'500',color:'#535353',marginRight:10,}}>加急</Text>
+                            <Image style={{ width:25,height:30,resizeMode:'center'}} source={require('../imgs/flag.png')} />
+                        </View>
+                        <TouchableHighlight
+                            onPress={this._Press.bind(this)}
+                            underlayColor='transparent'
+                        >
+                            <View style={{
+                                flexDirection:'column',
+                                alignItems:'center',
+                                justifyContent: 'space-between',
+                            }}>
+                                <Image style={{ width:30,height:25,resizeMode:'center'}} source={require('../imgs/scanner_btn.png')} />
+                                <Text style={{fontSize:11}}>扫码绑定站点</Text>
+                            </View>
+                        </TouchableHighlight>
                     </View>
-                    <TouchableHighlight
-                        onPress={this._Press.bind(this)}
-                        underlayColor='transparent'
-                    >
+                )
+            }else{
+                return(
+                    <View style={{ 
+                        flexDirection:'row',
+                        alignItems:'center',
+                        justifyContent: 'space-between',
+                    }}>
                         <View style={{
-                            flexDirection:'column',
+                            flexDirection:'row',
                             alignItems:'center',
-                            justifyContent: 'space-between',
+                            justifyContent: 'flex-end',
+                            marginRight: 20,
                         }}>
-                            <Image style={{ width:30,height:25,resizeMode:'center'}} source={require('../imgs/scanner_btn.png')} />
-                            <Text style={{fontSize:11}}>扫码绑定站点</Text>
+                            <Text style={{fontSize:15,fontWeight:'500',color:'#535353',marginRight:10,}}>加急</Text>
+                            <Image style={{ width:25,height:30,resizeMode:'center'}} source={require('../imgs/flag.png')} />
                         </View>
-                    </TouchableHighlight>
-                </View>
-            )
+                    </View>
+                )
+            }
         }else{
-            return(
-                <View style={{ 
-                    flexDirection:'row',
-                    alignItems:'center',
-                    justifyContent: 'space-between',
-                }}>
-                    <TouchableHighlight
-                        onPress={this._Press.bind(this)}
-                        underlayColor='transparent'
-                    >
-                        <View style={{
-                            flexDirection:'column',
-                            alignItems:'center',
-                            justifyContent: 'space-between',
-                        }}>
-                            <Image style={{ width:30,height:25,resizeMode:'center'}} source={require('../imgs/scanner_btn.png')} />
-                            <Text style={{fontSize:11}}>扫码绑定站点</Text>
-                        </View>
-                    </TouchableHighlight>
-                </View>
-            )
+            if (params.info.state_name == "配料中") {
+                return(
+                    <View style={{ 
+                        flexDirection:'row',
+                        alignItems:'center',
+                        justifyContent: 'space-between',
+                    }}>
+                        <TouchableHighlight
+                            onPress={this._Press.bind(this)}
+                            underlayColor='transparent'
+                        >
+                            <View style={{
+                                flexDirection:'column',
+                                alignItems:'center',
+                                justifyContent: 'space-between',
+                            }}>
+                                <Image style={{ width:30,height:25,resizeMode:'center'}} source={require('../imgs/scanner_btn.png')} />
+                                <Text style={{fontSize:11}}>扫码绑定站点</Text>
+                            </View>
+                        </TouchableHighlight>
+                    </View>
+                )
+            }else{
+               return(
+                    <View style={{ 
+                        flexDirection:'row',
+                        alignItems:'center',
+                        justifyContent: 'space-between',
+                    }}>
+                    </View>
+                ) 
+            }
         }
     }
 }
@@ -114,14 +145,19 @@ export default class Details extends Component {
     }
     
     _onPress() {
-        resetAction = NavigationActions.reset({
-            index: 0,
-            actions: [
-                NavigationActions.navigate({routeName:'Main'})//要跳转到的页面名字
-            ]
-        });
-        this.props.navigation.dispatch(resetAction);
-        // this.props.navigation.navigate('Main');
+        try {
+            resetAction = NavigationActions.reset({
+                index: 0,
+                actions: [
+                    NavigationActions.navigate({routeName:'Main'})//要跳转到的页面名字
+                ]
+            });
+            this.props.navigation.dispatch(resetAction);
+        }
+        catch(err){
+            this.props.navigation.navigate('Main');
+            ToastAndroid.show("程序出错", ToastAndroid.SHORT);
+        }
     }
     
     state = {
