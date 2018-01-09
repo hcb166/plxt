@@ -35,13 +35,21 @@ class Material extends Component {
         super(props);
     }
     render() {
-        
-        return (
-            <View style={{justifyContent:'flex-start'}}>
-                <Text style={{color:'#535353',fontSize: 14}}>{this.props.worklinename}</Text>
-                <Text style={{fontSize:11}}>{this.props.packagingname}</Text>
-            </View>
-        )
+        if(!this.props.packagingname){
+            return (
+                <View style={{justifyContent:'flex-start'}}>
+                    <Text style={{color:'#535353',fontSize: 14}}>{this.props.worklinename}</Text>
+                    <Text style={{fontSize:11,}}>空货架</Text>
+                </View>
+            )
+        }else{
+            return (
+                <View style={{justifyContent:'flex-start'}}>
+                    <Text style={{color:'#535353',fontSize: 14}}>{this.props.worklinename}</Text>
+                    <Text style={{fontSize:11}}>{this.props.packagingname}</Text>
+                </View>
+            )
+        }
     }
 }
 
@@ -209,10 +217,10 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
     },
     circle: {
-        width: 5,
-        height: 5,
+        width: 10,
+        height: 10,
         backgroundColor: '#f00',
         borderRadius: 5,
-        // marginLeft: 5,
+        marginLeft: -5,
     }
 })

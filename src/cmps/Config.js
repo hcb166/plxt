@@ -91,7 +91,7 @@ class InputLoginScreen extends Component {
                     },
                     expires: null,
                 })
-                ToastAndroid.show('登录成功', ToastAndroid.SHORT);
+                ToastAndroid.show('保存成功', ToastAndroid.SHORT);
                 // this.props.navigation.navigate('Main');
                 resetAction = NavigationActions.reset({
                     index: 0,
@@ -163,7 +163,7 @@ class InputLoginScreen extends Component {
                                 onChangeText={this.GetCodeValue.bind(this)}
                                 underlineColorAndroid='transparent'
                                 defaultValue={this.state.code}
-                                // placeholderTextColor='#aaa'
+                                placeholder='如 : pl_pda_01'
                             />
                         </View> 
                         <View style={styles.inputcontainer}>
@@ -173,6 +173,7 @@ class InputLoginScreen extends Component {
                                 onChangeText={this.GetIPValue.bind(this)}
                                 underlineColorAndroid='transparent'
                                 defaultValue={this.state.ip}
+                                placeholder='如 : 192.168.1.129'
                                 // keyboardType="email-address"
                                 // placeholderTextColor='#aaa'
                             />
@@ -184,11 +185,12 @@ class InputLoginScreen extends Component {
                                 onChangeText={this.GetPortValue.bind(this)}
                                 underlineColorAndroid='transparent'
                                 defaultValue={this.state.port}
+                                placeholder='如 : 8009'
                                 // placeholderTextColor='#aaa'
                             />
                         </View>  
                         <View style={{width:200,marginTop:50,flexDirection:'row',justifyContent:'space-between'}}>
-                            <Button  color="#ff8800" disabled={this.state.clickState} onPress={this.Login.bind(this)} title=' 登 录 ' />
+                            <Button  color="#ff8800" disabled={this.state.clickState} onPress={this.Login.bind(this)} title=' 保 存 ' />
                             <Button color="#ff8800" onPress={this._goBack.bind(this)} title=' 取  消 ' />
                         </View>    
                     </View>

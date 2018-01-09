@@ -229,14 +229,19 @@ class MaInfo extends Component {
 
     componentDidMount() {
         // 传递过来的数据进行格式化
-        let mtn = this.props.data.material_type_name.split(',');
-        let mn = this.props.data.material_names.split(',');
-        // let n = this.props.data.nums.split(',');
-        let nr = this.props.data.num_remarks.split(',');
-        let mun = this.props.data.material_unit_name.split(',');
-        let mrn = this.props.data.material_rack_name.split(',');
+        try{
+            var mtn = this.props.data.material_type_name.split(',');
+            var mn = this.props.data.material_names.split(',');
+            var nr = this.props.data.num_remarks.split(',');
+            var mun = this.props.data.material_unit_name.split(',');
+            var mrn = this.props.data.material_rack_name.split(',');
+        }
+        catch(err){
+            var mtn = [];
+            ToastAndroid.show('程序出错', ToastAndroid.SHORT);
+        }
         
-        let arr = [];
+        var arr = [];
         mtn.forEach(function(val,index){
             arr.push({
                 key: index,
@@ -277,35 +282,55 @@ class MaInfo extends Component {
 
 
     render() {
-        return(
-            <View>
-                <View style={{ flexDirection:'row',justifyContent:'space-between',marginTop:10,marginBottom:10}}>
-                    <Text style={{fontSize: 14,color: '#535353',}}>呼叫位置：{this.props.data.workline_name} </Text>
-                    <Text style={[{fontSize: 14,}]}>状态：<Text style={[{color:this.state.clr}]}>{this.props.data.state_name}</Text></Text>
+
+        if(!this.props.data.packaging_code){
+            return (
+                <View>
+                    <View style={{ flexDirection:'row',justifyContent:'space-between',marginTop:10,marginBottom:10}}>
+                        <Text style={{fontSize: 14,color: '#535353',}}>呼叫位置：{this.props.data.workline_name} </Text>
+                        <Text style={[{fontSize: 14,}]}>状态：<Text style={[{color:this.state.clr}]}>{this.props.data.state_name}</Text></Text>
+                    </View>
+                    <View style={{ 
+                        width: width - 30,
+                        justifyContent:'center',
+                        padding: 15,
+                    }}>
+                        <Text style={{lineHeight: 30,fontSize:13,textAlign:'center'}}>该任务为呼叫空货架请求，请将空货架放置于上料站点，并扫码确认！</Text>
+                    </View>
                 </View>
-                <View style={{ 
-                    width: width - 30,
-                    flexDirection:'row',
-                    justifyContent:'space-between',
-                    paddingBottom: 15,
-                    borderBottomWidth:1,
-                    borderColor:'#cdcdcd',
-                    marginBottom: 10,
-                }}>
-                    <Text style={{flex:4,fontSize: 14,color: '#535353',}}>物料</Text>
-                    <Text style={{flex:2,fontSize: 14,color: '#535353',}}>数量</Text>
-                    <Text style={{flex:2,fontSize: 14,color: '#535353',}}>存储位置</Text>
+                )
+        }else{
+            return(
+                <View>
+                    <View style={{ flexDirection:'row',justifyContent:'space-between',marginTop:10,marginBottom:10}}>
+                        <Text style={{fontSize: 14,color: '#535353',}}>呼叫位置：{this.props.data.workline_name} </Text>
+                        <Text style={[{fontSize: 14,}]}>状态：<Text style={[{color:this.state.clr}]}>{this.props.data.state_name}</Text></Text>
+                    </View>
+                    <View style={{ 
+                        width: width - 30,
+                        flexDirection:'row',
+                        justifyContent:'space-between',
+                        paddingBottom: 15,
+                        borderBottomWidth:1,
+                        borderColor:'#cdcdcd',
+                        marginBottom: 10,
+                    }}>
+                        <Text style={{flex:4,fontSize: 14,color: '#535353',}}>物料</Text>
+                        <Text style={{flex:2,fontSize: 14,color: '#535353',}}>数量</Text>
+                        <Text style={{flex:2,fontSize: 14,color: '#535353',}}>存储位置</Text>
+                    </View>
+                    <FlatList
+                            style={{
+                                height: height - 255,
+                            }}
+                            data={this.state.data}
+                            renderItem={this._renderItem.bind(this)}
+                        />
+                    
                 </View>
-                <FlatList
-                        style={{
-                            height: height - 255,
-                        }}
-                        data={this.state.data}
-                        renderItem={this._renderItem.bind(this)}
-                    />
-                
-            </View>
-        )
+            )
+        }
+
     }
 }
 

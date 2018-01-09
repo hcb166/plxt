@@ -77,7 +77,7 @@ class InputLoginScreen extends Component {
                 },
                 expires: null,
             })
-            ToastAndroid.show('登录成功', ToastAndroid.SHORT);
+            ToastAndroid.show('保存成功', ToastAndroid.SHORT);
             this.props.navigation.navigate('Main');
         }).catch((error) => {
             ToastAndroid.show(error.message, ToastAndroid.SHORT);
@@ -163,7 +163,7 @@ class ScanLoginScreen extends Component {
                     ToastAndroid.show(responseJson.text, ToastAndroid.SHORT);
                     return
                 }
-                ToastAndroid.show('登录成功', ToastAndroid.SHORT);
+                ToastAndroid.show('保存成功', ToastAndroid.SHORT);
                 this.props.navigation.navigate('Main');
             }).catch((error) => {
                 ToastAndroid.show(error.message, ToastAndroid.SHORT);
