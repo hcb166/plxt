@@ -35,11 +35,18 @@ class Material extends Component {
         super(props);
     }
     render() {
-        if(!this.props.packagingname){
+        if(this.props.specialtype == 2){
             return (
                 <View style={{justifyContent:'flex-start'}}>
                     <Text style={{color:'#535353',fontSize: 14}}>{this.props.worklinename}</Text>
-                    <Text style={{fontSize:11,}}>空货架</Text>
+                    <Text style={{fontSize:11,color:'#2193f3'}}>SAP</Text>
+                </View>
+            )
+        } else if(this.props.specialtype == 1){
+            return (
+                <View style={{justifyContent:'flex-start'}}>
+                    <Text style={{color:'#535353',fontSize: 14}}>{this.props.worklinename}</Text>
+                    <Text style={{fontSize:11,color:'#2193f3'}}>空货架</Text>
                 </View>
             )
         }else{
@@ -54,41 +61,16 @@ class Material extends Component {
 }
 
 class Sta extends Component {
-    state = {
-        clr: '#2193f3',
-        robot: '',
-    }
     constructor(props) {
         super(props);
     }
 
-    componentWillMount() {
-        // console.log(this.props.status,this.props.robot)
-        // "已分配车"  "搬运中"  的状态下才显示小车
-        switch(this.props.status) {
-            case "正常完成": 
-                this.setState({clr:'#1eb852'});
-                break;
-            case "取消订单":
-                this.setState({clr:'#f71313'});
-                break;
-            case "异常完成":
-                this.setState({clr:'#f71313'});
-                break;
-            case "已分配车":
-                // this.setState({robot:this.props.robot});
-                break;
-            case "搬运中":
-                // this.setState({robot:this.props.robot});
-                break;
-            default:
-                // this.setState({robot:''});
-                break;
-        }
-        // console.log(this.state.robot)
+    state = {
+        clr: '#2193f3',  //蓝色
+        robot: '',
+    }
 
-
-
+    componentDidMount() {
     }
 
     render() {
@@ -126,7 +108,10 @@ class Sta extends Component {
                         flexDirection:'row',
                         alignItems: 'center',
                     }}>
-                        <Text style={[{fontSize: 14,},{color:this.state.clr}]}>{this.props.status}</Text>
+                        <Text style={[{fontSize: 14,},{color: 
+                            this.props.status == "正常完成" ? "#1eb852" : 
+                            this.props.status == "取消订单" || this.props.status == "异常完成" ? "#f71313" : "#2193f3"
+                        }]}>{this.props.status} {this.props.remarks}</Text>
                         <View style={{}}></View>
                     </View>
                     <Text style={{fontSize:11}}>{this.props.createstamp}</Text>
@@ -137,6 +122,7 @@ class Sta extends Component {
 
     }
 }
+
 
 
 class Index extends Component {
@@ -181,12 +167,14 @@ export default class Item extends Component {
                         <View  style={{flex:3,}}>
                             <Material 
                                 worklinename={this.props.data.workline_name}  
-                                packagingname={this.props.data.packaging_name}  
+                                packagingname={this.props.data.packaging_name} 
+                                specialtype={this.props.data.special_type} 
                             />
                         </View>
                         <View  style={{flex:6,}}>
                             <Sta 
                                 status={this.props.data.state_name} 
+                                remarks={this.props.data.remarks} 
                                 robot={this.props.data.robot_code} 
                                 createstamp={this.props.data.create_stamp} 
                             />

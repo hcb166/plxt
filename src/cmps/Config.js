@@ -112,7 +112,7 @@ class InputLoginScreen extends Component {
     _goBack() {
         // 只需要退出当前路由即可 '取消'操作
         // this.props.navigation.navigate('Main');
-        if(!this.state.port || !this.state.ip || !this.state.code){return}
+        // if(!this.state.port || !this.state.ip || !this.state.code){return}
         
         resetAction = NavigationActions.reset({
             index: 0,

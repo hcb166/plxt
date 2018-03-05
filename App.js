@@ -21,6 +21,7 @@ import ScanLoginFailScreen from './src/cmps/ScanLoginFail';
 import ScanLoginSuccessScreen from './src/cmps/ScanLoginSuccess';
 
 import ScanScreen from './src/cmps/Scan';
+import ThreeSScanScreen from './src/cmps/threeSScan';
 import ScanFailScreen from './src/cmps/ScanFail';
 import ScanSuccessScreen from './src/cmps/ScanSuccess';
 import ConfigScreen from './src/cmps/Config';
@@ -65,6 +66,12 @@ const RootNavigator = StackNavigator({
     },
     Scan: {
         screen: ScanScreen,
+        navigationOptions: {
+            header: null,
+        }
+    },
+    ThreeSScan: {
+        screen: ThreeSScanScreen,
         navigationOptions: {
             header: null,
         }

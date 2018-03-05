@@ -6,8 +6,10 @@ import {
     TextInput,
     ToastAndroid,
     FlatList,
+    Image,
     TouchableHighlight,
 } from 'react-native';
+import { NativeModules } from 'react-native';
 import SplashScreen from 'react-native-splash-screen'
 import Item from './Item';
 import TopBar from '../utils/TopBar';
@@ -22,7 +24,7 @@ class MainScree extends Component {
     };
     address = '';
     devicecode: '';
-    componentWillMount() {
+    componentDidMount() {
         var _this = this;
         // 启动屏设置
         SplashScreen.hide();
@@ -30,7 +32,7 @@ class MainScree extends Component {
         // 读取本地数据 查看是否存在历史登录数据
         storage.getAllDataForKey('serverIP').then((serverIP) => {
             if (serverIP.length < 1) { 
-                this.props.navigation.navigate('Login');
+                // this.props.navigation.navigate('Login');
                 _this.componentWillUnmount();
                 ToastAndroid.show("请先输入服务器地址", ToastAndroid.SHORT);
                 return 
@@ -77,7 +79,6 @@ class MainScree extends Component {
                         return
                     }
                     // 添加数据过滤功能
-                    // console.log(responseJson.bills)
                     if(responseJson.bills){
 
                         // 添加已读和未读功能
@@ -85,32 +86,31 @@ class MainScree extends Component {
                         // 已读信息缓存到本地
                         // 获取最新数据后需要更新本地已读信息数据(子集)，保证缓存数据不会越来越大
                         // 每条需要根据key的唯一性进行匹配
-                        // if(readedList.length>0) {
-                            let dataKeys = [];
-                            let res_arr = responseJson.bills;
-                            res_arr.forEach(function(value,index){
-                                dataKeys.push(value["code"]);
-                                if(readedList.indexOf(value["code"]) >= 0) {
-                                    res_arr[index]['readed'] = 1;
-                                }else{
-                                    res_arr[index]['readed'] = 0;
-                                }
-                                res_arr[index]["key"] = value["code"];
-                                res_arr[index]["index"] = index+1;
-                            })
+                        let dataKeys = [];
+                        let res_arr = responseJson.bills;
+                        res_arr.forEach(function(value,index){
+                            dataKeys.push(value["code"]);
+                            if(readedList.indexOf(value["code"]) >= 0) {
+                                res_arr[index]['readed'] = 1;
+                            }else{
+                                res_arr[index]['readed'] = 0;
+                            }
+                            res_arr[index]["key"] = value["code"];
+                            res_arr[index]["index"] = index+1;
+                        })
 
-                            // 同时更新本地readNews信息 如果readNews中的信息不再当前数据中则清除
-                            readedList.forEach(function(val,index){
-                                if(dataKeys.indexOf(val) < 0) {
-                                    readedList.splice(index, 1);
-                                }
-                            })
-                            storage.save({
-                                key: 'readedNews',
-                                id: 2,
-                                data: readedList,
-                                expires: null,
-                            })
+                        // 同时更新本地readNews信息 如果readNews中的信息不再当前数据中则清除
+                        readedList.forEach(function(val,index){
+                            if(dataKeys.indexOf(val) < 0) {
+                                readedList.splice(index, 1);
+                            }
+                        })
+                        storage.save({
+                            key: 'readedNews',
+                            id: 2,
+                            data: readedList,
+                            expires: null,
+                        })
 
                         let filterCondition = this.state.text;
                         let arr = [];
@@ -124,7 +124,6 @@ class MainScree extends Component {
                         }else{
                             arr = responseJson.bills;
                         }
-                        // }
                         this.setState({data:arr})
                         // 销毁 清除内存缓存数据
                         arr = null;
@@ -162,7 +161,18 @@ class MainScree extends Component {
     _onRefresh() {
         //如果使用 this.getData() 如何判断刷新成功？？？？？
         this.getData();
-        ToastAndroid.show("刷新成功", ToastAndroid.SHORT);
+        // ToastAndroid.show("刷新成功", ToastAndroid.SHORT);
+    }
+    
+    _scanThreeS() {
+        NativeModules.AScanModule.rnCallNative('Demo');
+        return
+        try{
+            this.props.navigation.navigate('ThreeSScan',{});
+        }
+        catch(err) {
+            ToastAndroid.show('err', ToastAndroid.SHORT);
+        }
     }
 
     render() {
@@ -189,6 +199,20 @@ class MainScree extends Component {
                             onChangeText={(text) => this.setState({text})}
                             value={this.state.text}
                         />
+                        <TouchableHighlight
+                            underlayColor='transparent'
+                            onPress={this._scanThreeS.bind(this)}
+                            >
+                            <View 
+                                style={{
+                                    flexDirection:'column',
+                                    alignItems:'center',
+                                    justifyContent: 'space-between',
+                                }}>
+                                <Image style={{ width:30,height:25,resizeMode:'center'}} source={require('../imgs/scanner_btn.png')} />
+                                <Text style={{fontSize:11}}>3S标签扫码</Text>
+                            </View>
+                        </TouchableHighlight>
                     </View>
                     
                     <View style={styles.content}>
@@ -232,7 +256,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     input: {
-        minWidth:200, 
+        width:160, 
         height: 35,
         paddingTop: 5,
         paddingBottom: 5,
